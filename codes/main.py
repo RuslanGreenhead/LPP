@@ -1,1 +1,2 @@
 print("Initialization!")
+print()
