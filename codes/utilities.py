@@ -14,6 +14,9 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 
 
+# ------------------------------------Metrics & scores------------------------------------- #
+
+
 np.set_printoptions(suppress=True, precision=3)
 
 
@@ -130,7 +133,8 @@ def discrepancy_score(observations, forecasts, model='QDA', n_iters=1):
 
     return mean, std
 
-#------------------------------------W&B utilities-------------------------------------#
+
+# ------------------------------------W&B utilities------------------------------------- #
 
 
 def init_a_wandb(name, project, notes, group, tag, config):
@@ -284,7 +288,8 @@ def wandb_true_pred_histograms(run, y_test, y_pred, specifier, data_name):
 
     return run
 
-#------------------------------------Other utilities-------------------------------------#
+
+# ------------------------------------Other utilities------------------------------------- #
 
 
 def plot_loss(run, history, name):
@@ -319,8 +324,8 @@ def print_the_evaluated_results(specifier, learning_method):
         results = pickle.load(fp)
 
     # Regression metrics
-    MEA, RMSE, MRAE, JSD, R2_Score, MEAPE_mu, MEAPE_std = [], [], [], [], [], [], []
-    # Classification and clustering metrics
+    MEA, RMSE, MRAE, JSD, R2_Score, MEAPE_mean, MEAPE_std = [], [], [], [], [], [], []
+    # Classification metrics
     ARI, NMI, Precision, Recall, F1_Score, ROC_AUC, ACC = [], [], [], [], [], [], []
 
     for repeat, result in results.items():
@@ -337,7 +342,7 @@ def print_the_evaluated_results(specifier, learning_method):
             meape_errors = mean_estimation_absolute_percentage_error(
                 y_true=y_true, y_pred=y_pred, n_iters=100)
 
-            MEAPE_mu.append(meape_errors.mean(axis=0))
+            MEAPE_mean.append(meape_errors.mean(axis=0))
             MEAPE_std.append(meape_errors.std(axis=0))
 
         else:
@@ -351,7 +356,7 @@ def print_the_evaluated_results(specifier, learning_method):
             meape_errors = mean_estimation_absolute_percentage_error(
                 y_true=y_true, y_pred=y_pred, n_iters=100)
 
-            MEAPE_mu.append(meape_errors.mean(axis=0))
+            MEAPE_mean.append(meape_errors.mean(axis=0))
             MEAPE_std.append(meape_errors.std(axis=0))
             ACC.append(metrics.accuracy_score(y_true, y_pred, ))
 
@@ -361,7 +366,7 @@ def print_the_evaluated_results(specifier, learning_method):
         MRAE = np.nan_to_num(np.asarray(MRAE))
         JSD = np.nan_to_num(np.asarray(JSD))
         R2_Score = np.nan_to_num(np.asarray(R2_Score))
-        MEAPE_mu = np.nan_to_num(np.asarray(MEAPE_mu))
+        MEAPE_mean = np.nan_to_num(np.asarray(MEAPE_mean))
 
         mae_ave = np.mean(MEA, axis=0)
         mae_std = np.std(MEA, axis=0)
@@ -378,8 +383,8 @@ def print_the_evaluated_results(specifier, learning_method):
         r2_ave = np.mean(R2_Score, axis=0)
         r2_std = np.std(R2_Score, axis=0)
 
-        meape_ave = np.mean(MEAPE_mu, axis=0)
-        meape_std = np.std(MEAPE_mu, axis=0)
+        meape_ave = np.mean(MEAPE_mean, axis=0)
+        meape_std = np.std(MEAPE_mean, axis=0)
 
         print("   mae ", " \t rmse ", "\t mrae",
               "\t r2_score ", "\t meape ", "\t jsd ",
@@ -401,7 +406,7 @@ def print_the_evaluated_results(specifier, learning_method):
     else:
 
         JSD = np.nan_to_num(np.asarray(JSD))
-        MEAPE_mu = np.nan_to_num(np.asarray(MEAPE_mu))
+        MEAPE_mean = np.nan_to_num(np.asarray(MEAPE_mean))
         ARI = np.nan_to_num(np.asarray(ARI))
         NMI = np.nan_to_num(np.asarray(NMI))
         Precision = np.nan_to_num(np.asarray(Precision))
@@ -431,7 +436,7 @@ def print_the_evaluated_results(specifier, learning_method):
         jsd_ave = np.mean(JSD, axis=0)
         jsd_std = np.std(JSD, axis=0)
 
-        meape_ave = np.mean(MEAPE_mu, axis=0)
+        meape_ave = np.mean(MEAPE_mean, axis=0)
         meape_std = np.std(MEAPE_std, axis=0)
 
         acc_ave = np.mean(ACC, axis=0)
