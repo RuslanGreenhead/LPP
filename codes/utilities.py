@@ -178,8 +178,6 @@ def wandb_metrics(run, y_true, y_pred, learning_method):
     elif learning_method == "classification":
 
         run.log({
-            "ARI": metrics.adjusted_rand_score(y_true, y_pred),
-            "NMI": metrics.normalized_mutual_info_score(y_true, y_pred),
             "JSD": jsd(y_true=y_true, y_pred=y_pred).mean(),
             "Precision": metrics.precision_score(y_true, y_pred, average='weighted'),
             "Recall": metrics.recall_score(y_true, y_pred, average='weighted'),
@@ -326,7 +324,7 @@ def print_the_evaluated_results(specifier, learning_method):
     # Regression metrics
     MEA, RMSE, MRAE, JSD, R2_Score, MEAPE_mean, MEAPE_std = [], [], [], [], [], [], []
     # Classification metrics
-    ARI, NMI, Precision, Recall, F1_Score, ROC_AUC, ACC = [], [], [], [], [], [], []
+    Precision, Recall, F1_Score, ROC_AUC, ACC = [], [], [], [], []
 
     for repeat, result in results.items():
         y_true = result["y_test"]
@@ -346,8 +344,6 @@ def print_the_evaluated_results(specifier, learning_method):
             MEAPE_std.append(meape_errors.std(axis=0))
 
         else:
-            ARI.append(metrics.adjusted_rand_score(y_true, y_pred))
-            NMI.append(metrics.normalized_mutual_info_score(y_true, y_pred))
             JSD.append(jsd(y_true=y_true, y_pred=y_pred).mean())
             Precision.append(metrics.precision_score(y_true, y_pred, average='weighted'))
             Recall.append(metrics.recall_score(y_true, y_pred, average='weighted'))
@@ -407,19 +403,11 @@ def print_the_evaluated_results(specifier, learning_method):
 
         JSD = np.nan_to_num(np.asarray(JSD))
         MEAPE_mean = np.nan_to_num(np.asarray(MEAPE_mean))
-        ARI = np.nan_to_num(np.asarray(ARI))
-        NMI = np.nan_to_num(np.asarray(NMI))
         Precision = np.nan_to_num(np.asarray(Precision))
         Recall = np.nan_to_num(np.asarray(Recall))
         F1_Score = np.nan_to_num(np.asarray(F1_Score))
         ROC_AUC = np.nan_to_num(np.asarray(ROC_AUC))
         ACC = np.nan_to_num((np.asarray(ACC)))
-
-        ari_ave = np.mean(ARI, axis=0)
-        ari_std = np.std(ARI, axis=0)
-
-        nmi_ave = np.mean(NMI, axis=0)
-        nmi_std = np.std(NMI, axis=0)
 
         precision_ave = np.mean(Precision, axis=0)
         precision_std = np.std(Precision, axis=0)
@@ -442,7 +430,7 @@ def print_the_evaluated_results(specifier, learning_method):
         acc_ave = np.mean(ACC, axis=0)
         acc_std = np.std(ACC, axis=0)
 
-        print("  ari ", "  nmi ", "\t preci", "\t recall ",
+        print(" preci", "\t recall ",
               "\t f1_score ", "\t roc_auc ", "\t meape ", "\t jsd ", "\t acc"
               )
 
@@ -450,8 +438,7 @@ def print_the_evaluated_results(specifier, learning_method):
               " Ave ", " std ", " Ave ", " std ", " Ave ", " std ", " Ave ", " std ", " Ave ", " std "
               )
 
-        print("%.3f" % ari_ave, "%.3f" % ari_std,
-              "%.3f" % nmi_ave, "%.3f" % nmi_std,
+        print(
               "%.3f" % precision_ave, "%.3f" % precision_std,
               "%.3f" % recall_ave, "%.3f" % recall_std,
               "%.3f" % f1_score_ave, "%.3f" % f1_score_std,
