@@ -7,7 +7,7 @@ tfk = tf.keras
 tfkl = tf.keras.layers
 tf.keras.backend.set_floatx('float32')
 
-MULTILABLE = False
+MULTILABEL = False
 
 
 class VNNRegression(tfk.Model):
@@ -25,7 +25,7 @@ class VNNRegression(tfk.Model):
 
         self.dense_2 = tfkl.Dense(units=self.output_dim)
 
-    def call(self, inputs):     # training=None
+    def call(self, inputs):    # training=None
         x = self.dense_1(inputs)
         x = self.dense_2(x)
         return x
@@ -107,14 +107,15 @@ class VNNClassification(tfk.Model):
                                   input_shape=(self.input_dim, 1),
                                   name=name,
                                   )
-        if self.output_dim == 1 and MULTILABLE is False:
+        if self.output_dim == 1 and MULTILABEL is False:
             activation_fn = tf.nn.sigmoid
-        elif self.output_dim > 1 and MULTILABLE is False:
+        elif self.output_dim > 1 and MULTILABEL is False:
             activation_fn = tf.nn.softmax
         else:
             print("Multi-label classification is not supported yet!")
-            f = True
-            assert f is True
+            # f = True
+            # assert f is True
+            quit()
 
         self.dense_2 = tfkl.Dense(units=self.output_dim,
                                   activation=activation_fn,
@@ -149,14 +150,15 @@ class DNNClassification(tfk.Model):
         self.dense_3 = tfkl.Dense(units=int(self.n_units),
                                   activation=tf.nn.relu,)
 
-        if self.output_dim == 1 and MULTILABLE is False:
+        if self.output_dim == 1 and MULTILABEL is False:
             activation_fn = tf.nn.sigmoid
-        elif self.output_dim > 1 and MULTILABLE is False:
+        elif self.output_dim > 1 and MULTILABEL is False:
             activation_fn = tf.nn.softmax
         else:
             print("Multi-label classification is not supported yet!")
-            f = True
-            assert f is True
+            # f = True
+            # assert f is True
+            quit()
 
         self.dense_4 = tfkl.Dense(units=self.output_dim,
                                   activation=activation_fn,)
@@ -177,27 +179,21 @@ def determine_reg_tf_loss(loss):
 
     if loss == "mae":
         loss_fn = tfk.losses.mean_absolute_error
-
     elif loss == "mse":
         loss_fn = tfk.losses.mean_squared_error
-
     elif loss == "msle":
         loss_fn = tfk.losses.mean_squared_logarithmic_error
-
     elif loss == "mape":
         loss_fn = tfk.losses.mean_absolute_percentage_error
-
     elif loss == "kld":
         loss_fn = tfk.losses.kl_divergence
-
     elif loss == "cosine_similarity":  # check the loss function here
         loss_fn = tfk.losses.cosine_similarity
-
     elif loss == "squared_hinge":  # check the loss function here
         loss_fn = tfk.losses.SquaredHinge
-
     else:
-        print("Loss function is not defined.")
+        print("Loss function is not defined")
+        quit()
 
     return loss_fn
 
@@ -211,7 +207,8 @@ def determine_cls_tf_loss(loss):
     elif loss == "cce":
         loss_fn = tfk.losses.categorical_crossentropy
     else:
-        print("Loss function is not defined.")
+        print("Loss function is not defined")
+        quit()
 
     return loss_fn
 
@@ -221,18 +218,15 @@ def compile_and_fit(model, optimizer, loss, learning_rate, batch_size,
 
     if optimizer.lower() == "adam":
         model.compile(optimizer=tfk.optimizers.Adam(learning_rate=learning_rate), loss=loss)
-
     elif optimizer.lower() == "adamax":
         model.compile(optimizer=tfk.optimizers.Adamax(learning_rate=learning_rate), loss=loss)
-
     elif optimizer.lower() == "rmsprop":
         model.compile(optimizer=tfk.optimizers.RMSprop(learning_rate=learning_rate), loss=loss)
-
     elif optimizer.lower() == "sgd":
         model.compile(optimizer=tfk.optimizers.SGD(learning_rate=learning_rate), loss=loss)
-
     else:
-        print("undefined optimizer.")
+        print("Undefined optimizer")
+        quit()
 
     history = model.fit(x=x_train, y=y_train, validation_data=(x_val, y_val),
                         batch_size=batch_size, epochs=n_epochs, verbose=True,)
