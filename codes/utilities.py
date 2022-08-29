@@ -139,7 +139,9 @@ def discrepancy_score(observations, forecasts, model='QDA', n_iters=1):
 
 def init_a_wandb(name, project, notes, group, tag, config):
 
-    """ name := the within the project name, e.g., RF-reg-1
+    """
+    params:
+        name := the within the project name, e.g., RF-reg-1
         project := the project name, e.g., Non-sequential Regressions
         notes := Description, e.g., Non-sequential Regressions Comparison for SuperOX
         group := name of experiment or the algorithm under consideration, e.g., RF-1
@@ -207,7 +209,7 @@ def wandb_features_importance(run, values_features_importance,
     return run
 
 
-def wandb_true_pred_plots(run, y_true, y_pred, specifier, data_name):
+def wandb_true_pred_plots(run, y_true, y_pred, specifier):
 
     t = np.arange(len(y_true))
     fig, ax = plt.subplots(1, figsize=(12, 5))
@@ -228,14 +230,14 @@ def wandb_true_pred_plots(run, y_true, y_pred, specifier, data_name):
     plt.ylabel("True/Pred Values")
     plt.legend(loc="best")
 
-    plt.title("Plots: target vs predicted value of " + specifier + " on: " + data_name)
-    plt.savefig("../figures/Plots:" + specifier + "on" + data_name + ".png")
-    run.log({"Plots: target vs predicted value of " + specifier + " on: " + data_name + str(r2): ax})
+    plt.title("Plots: target vs predicted value of " + specifier)
+    plt.savefig("../figures/Plots:" + specifier + ".png")
+    run.log({"Plots: target vs predicted value of " + specifier + str(r2): ax})
 
     return run
 
 
-def wandb_true_pred_scatters(run, y_test, y_pred, specifier, data_name):
+def wandb_true_pred_scatters(run, y_test, y_pred, specifier):
 
     _ = plt.figure(figsize=(12, 5))
 
@@ -248,14 +250,14 @@ def wandb_true_pred_scatters(run, y_test, y_pred, specifier, data_name):
     plt.xlabel("Index")
     plt.ylabel("True/Pred Values ")
     plt.legend(loc="best")
-    plt.title("Scatters: target vs predicted values of "+specifier+" on: "+data_name)
-    plt.savefig("../figures/Scatters: " + data_name + "-" + specifier + ".png")
-    run.log({"Scatters: target vs predicted values of "+specifier+" on: "+data_name: plt})
+    plt.title("Scatters: target vs predicted values of "+specifier)
+    plt.savefig("../figures/Scatters: " + specifier + ".png")
+    run.log({"Scatters: target vs predicted values of " + specifier: plt})
 
     return run
 
 
-def wandb_true_pred_histograms(run, y_test, y_pred, specifier, data_name):
+def wandb_true_pred_histograms(run, y_test, y_pred, specifier):
 
     plt.figure(figsize=(12, 5))
     plt.subplot(131)
@@ -279,9 +281,9 @@ def wandb_true_pred_histograms(run, y_test, y_pred, specifier, data_name):
     plt.xlabel("True and Pred. values ")
     plt.ylabel('Count')
     plt.legend(loc="best")
-    plt.title("Histograms: " + specifier + " on: " + data_name, )  # , font_size=12
-    plt.savefig("../figures/Histograms: " + data_name + "-" + specifier + ".png")
-    run.log({"Histograms: target vs predicted of " + specifier + " on: " + data_name: plt})
+    plt.title("Histograms: " + specifier )  # , font_size=12
+    plt.savefig("../figures/Histograms: " + "-" + specifier + ".png")
+    run.log({"Histograms: target vs predicted of " + specifier: plt})
     plt.show()
 
     return run

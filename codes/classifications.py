@@ -41,7 +41,7 @@ def apply_a_classifier(alg_name, n_estimators, x_train, y_train):
         model = AdaBoostClassifier(n_estimators=n_estimators,)
 
     else:
-        print ("Undefined classification model")
+        print("Undefined classification model")
         # f = True
         # assert f is True
         quit()

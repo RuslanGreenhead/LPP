@@ -37,23 +37,16 @@ def args_parser(args):
 
     return _pp, _tag, _run, _note, _data_name, _loss, _alg_name, \
            _group, _project, _n_units,_n_epochs, _optimizer, _batch_size, \
-           _learning_rate, _n_estimators, _output_dim, _n_clusters, _n_repeats, _target_is_org
+           _learning_rate, _n_estimators, _output_dim, _n_repeats, _target_is_org
 
 
 if __name__ == "__main__":
 
-    # all the string inputs will be converted to lower case.
+    # All the string inputs will be converted to lower case.
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--project", type=str, default="LPP",
                         help="Project name for WandB project initialization.")
-
-'''
-    parser.add_argument("--data_name", type=str, default="DD_Demo",
-                        help="Dataset's name, e.g.,"
-                             " Dyslexia Detection using: "
-                             "1) Demographic, 2) IA_report 3) Fixation_report.")
-'''
 
     parser.add_argument("--alg_name", type=str, default="--",
                         help="Name of the algorithm,"
@@ -77,69 +70,65 @@ if __name__ == "__main__":
                         help="Learning rate")
 
     parser.add_argument("--optimizer", type=str, default="adam",
-                        help="Name of the optimizer.")
+                        help="Name of the optimizer")
 
     parser.add_argument("--loss", type=str, default="--",
-                        help="Name of the loss function.")
+                        help="Name of the loss function")
 
     parser.add_argument("--pp", type=str, default=None,
                         help="Data preprocessing method:"
-                             " MinMax/Z-Scoring/etc.")
+                             " MinMax/Z-Scoring/etc")
 
     parser.add_argument("--tag", type=str, default="warmup",
                         help="W&B tag will be used to filter some of runs"
                              "of the same set of experiments if needed.")
 
     parser.add_argument("--note", type=str, default="--",
-                        help="W&B note, e.g., clustering for DD: Demographic")
+                        help="W&B note, e.g., classification for LPP")
 
-    parser.add_argument("--group", type=str, default="FClustering",
+    parser.add_argument("--group", type=str, default="FClassification",
                         help="W&B group name, i.e., "
-                             "using Features: FClustering, FClassification, FRegression, "
-                             "or using Time-series: TClustering, TClassification, TRegression.")
+                             "using Features: FClassification, FRegression, "
+                             "or using Time-series: TClassification, TRegression (not supported yet)")
 
     parser.add_argument("--n_estimators", type=int, default=100,
-                        help="Number of estimators in ensemble regressor algorithms.")
+                        help="Number of estimators in ensemble regressor algorithms")
 
     parser.add_argument("--output_dim", type=int, default=1,
-                        help="The output dimension of a prediction algorithm.")
-
-    parser.add_argument("--n_clusters", type=int, default=2,
-                        help="Number of clusters/classes/discrete target values.")
+                        help="The output dimension of a prediction algorithm")
 
     parser.add_argument("--n_repeats", type=int, default=10,
-                        help="Number of repeats in K-Fold cross validation.")
+                        help="Number of repeats in K-Fold cross validation")
 
     parser.add_argument("--target_is_org", type=int, default=1,
-                        help="Weather to use not preprocessed target values or not.")
+                        help="Weather to use not preprocessed target values or not")
 
     args = parser.parse_args()
 
-    pp, tag, run, note, data_name, loss, alg_name, group, \
+    pp, tag, run, note, loss, alg_name, group, \
         project, n_units, n_epochs, optimizer, batch_size, \
         learning_rate, n_estimators, output_dim, n_clusters, n_repeats, target_is_org = args_parser(args)
 
-    # evaluate and save the result in WandB for the entire test set
+    # Evaluate and save the result in WandB for the entire test set
     if "regression" in group.lower():
         learning_method = "regression"
-    elif "clustering" in group.lower():
-        learning_method = "clustering"
     elif "classification" in group.lower():
         learning_method = "classification"
     elif "baseline" in group.lower():
         learning_method = "baseline"
     else:
-        print ("Wrong learning method is defined!")
-        learning_method = True
-        assert learning_method is True
+        print("Wrong learning method is defined!")
+        # learning_method = True
+        # assert learning_method is True
+        quit()
 
     if run == 1:
 
-        data_org, x, y, features, targets, indicators = data.load_data(data_name=data_name, group=group)
+        data_org, x, y, features, targets, indicators = data.load_data(group=group)
 
         # Preprocessing tha datasets
         x_org, y_org = x, y
-        x, y = data.preprocess_data(x=x, y=y, pp=pp)
+        x, y = data.preprocess_data(x=x, y=y, method=pp)
 
         results = {}
         for repeat in range(1, n_repeats+1):
@@ -152,7 +141,6 @@ if __name__ == "__main__":
                 "n_clusters": n_clusters,
                 "n_repeats": n_repeats,
                 "repeat": repeat,
-                "data_name": data_name,
                 "preprocessing": pp,
                 "batch_size": batch_size,
                 "optimizer": optimizer,
@@ -176,7 +164,7 @@ if __name__ == "__main__":
 
             print("specifier:", specifier)
 
-            run = util.init_a_wandb(name=data_name+": "+specifier,
+            run = util.init_a_wandb(name=specifier,
                                     project=project,
                                     notes=note,
                                     group=group,
@@ -184,7 +172,7 @@ if __name__ == "__main__":
                                     config=config,
                                     )
 
-            # train, validation and test split:
+            # Train, validation and test split:
             x_train, y_train, x_val, y_val, x_test, y_test, = data.data_splitter(
                 x=x, y=y, x_org=x_org, y_org=y_org, target_is_org=target_is_org,
             )
@@ -200,13 +188,13 @@ if __name__ == "__main__":
                   "*******************************************************************************************",
                   )
 
-            # start of the program execution
+            # Start of the program execution
             start = time.time()
 
             input_dim = x_train.shape[1]
             # output_dim = y_train.shape[1]
 
-            # instantiating and fitting the model
+            # Instantiating and fitting the model
             if learning_method == "regression":
                 model, history = reg.instantiate_fit_reg_model(
                     alg_name=alg_name, loss=loss, n_units=n_units,
@@ -215,13 +203,6 @@ if __name__ == "__main__":
                     learning_rate=learning_rate,
                     x_train=x_train, y_train=y_train, x_val=x_val, y_val=y_val,
                     n_estimators=n_estimators, optimizer=optimizer,
-                )
-
-            elif learning_method == "clustering":
-                model, history = clu.instantiate_fit_clu_model(
-                    alg_name=alg_name,
-                    n_clusters=n_clusters,
-                    x_train=x_train, y_train=y_train
                 )
 
             elif learning_method == "classification":
@@ -239,7 +220,7 @@ if __name__ == "__main__":
                     y_train=y_train, y_test=y_test, target_is_org=target_is_org
                 )
 
-            # plot the train and validation loss function errors
+            # Plot the train and validation loss function errors
             if history is not None:
                 util.plot_loss(run=run, history=history, name=specifier)
 
@@ -248,14 +229,6 @@ if __name__ == "__main__":
                     y_pred = model.predict(x_test).ravel()
                 except:
                     y_pred = model.fit_predict(x_test).ravel()
-
-            if learning_method != "regression":
-                # to avoid 1) ill-defined situation in computing precision, recall, f1_score and roc_auc,
-                # 2) to avoid wrong computation in MEAPE, I labeled normal as 1 and abnormal as 2;
-                # thus y_pred should be compatible and to this end I added 1 to each of its entries.
-                if learning_method == "clustering":
-                    y_pred = y_pred + 1
-                y_pred = y_pred.astype(int)
 
             print("Shapes: \n",
                   "y_pred", y_pred.shape, "\n",
@@ -269,7 +242,7 @@ if __name__ == "__main__":
             results[repeat]["y_test"] = y_test
             results[repeat]["y_pred"] = y_pred
 
-            # end of the program execution
+            # End of the program execution
             end = time.time()
             print("Execution time of repeat number " + repeat + " is:", end - start)
 
@@ -281,19 +254,15 @@ if __name__ == "__main__":
                 # plot the predicted values and their std for the entire test set
                 run = util.wandb_true_pred_plots(run=run,
                                                  y_true=y_test, y_pred=y_pred,
-                                                 specifier=specifier,
-                                                 data_name=data_name,)
+                                                 specifier=specifier)
 
                 run = util.wandb_true_pred_scatters(run=run,
                                                     y_test=y_test, y_pred=y_pred,
-                                                    specifier=specifier,
-                                                    data_name=data_name,)
+                                                    specifier=specifier)
 
                 run = util.wandb_true_pred_histograms(run=run,
                                                       y_test=y_test, y_pred=y_pred,
-                                                      specifier=specifier,
-                                                      data_name=data_name,
-                                                      )
+                                                      specifier=specifier)
 
                 run = util.save_model(run=run, model=model, name=alg_name, experiment_name=specifier)
 
@@ -319,4 +288,4 @@ if __name__ == "__main__":
 
         print("specifier:", specifier)
 
-    util.print_the_evaluated_results(specifier, learning_method, )
+    util.print_the_evaluated_results(specifier, learning_method)
